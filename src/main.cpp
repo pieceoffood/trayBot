@@ -1,5 +1,7 @@
 #include "main.h"
 #include "motor.hpp"
+#include "okapi/api.hpp"
+
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -26,7 +28,31 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize() {}
+ int8_t lf=11;
+ int8_t lb=12;
+ int8_t rf=-20;
+ int8_t rb=-19;
+
+ using namespace okapi;
+ auto drive = okapi::ChassisControllerBuilder()
+         .withMotors(
+           {lf, lb},
+           {rf, rb}
+         )
+         // Green gearset, 4 in wheel diam, 11.5 in wheel track
+         .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR })
+         .withOdometry() // Use the same scales as the chassis (above)
+         .withGains(
+        {0.001, 0, 0.0001}, // Distance controller gains
+        {0.001, 0, 0.0001}, // Turn controller gains
+        {0.001, 0, 0.0001}  // Angle controller gains (helps drive straight)
+      )
+         .buildOdometry()
+;
+
+void competition_initialize() {
+
+}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -39,7 +65,10 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+  drive->moveDistance(12_in); // Drive forward 12 inches
+  drive->turnAngle(90_deg);   // Turn in place 90 degrees
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -55,8 +84,7 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
- void
- tray_control(void*) {
+ void  tray_control(void*) {
  	pros::Controller master(CONTROLLER_MASTER);
  	pros::Task tray_t(tray_pid);
  	bool b_toggle = false;
@@ -118,8 +146,7 @@ void autonomous() {}
  }
  */
 
- void
- arm_control(void*) {
+ void  arm_control(void*) {
  	pros::Controller master(CONTROLLER_MASTER);
  	pros::Task arm_t(arm_pid);
  	bool was_pid;
@@ -151,16 +178,18 @@ void autonomous() {}
  	}
  }
 
- void
- opcontrol() {
+ void  opcontrol() {
  	pros::Controller master(CONTROLLER_MASTER);
  	pros::Task tray_control_t(tray_control);
 
  	pros::Task t(arm_control);
  	while (true) {
- 		set_tank(master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_Y));
+ 		//set_tank(master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_Y));
 
  		//set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
+    Controller controller;
+    drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
+                          controller.getAnalog(ControllerAnalog::rightY));
 
  		if (master.get_digital(DIGITAL_L1)) {
  			set_rollers(127);

@@ -21,7 +21,7 @@ int sgn(int input) {
 int clipnum(int input, int clip) {
   if (input > clip)
     return clip;
-  else if (input < clip)
+  else if (input < -clip)
     return -clip;
   return input;
 }

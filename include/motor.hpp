@@ -10,6 +10,7 @@ extern pros::Motor tray;
 extern pros::Motor arm;
 extern pros::Motor left_roller;
 extern pros::Motor right_roller;
+extern int8_t lf, lb, rf, rb;
 
 void set_tank(int input_l, int input_r);
 void set_tray(int input);
