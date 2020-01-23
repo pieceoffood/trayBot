@@ -2,6 +2,46 @@
 #include "motor.hpp"
 #include "okapi/api.hpp"
 
+
+
+int8_t lf=11;
+int8_t lb=12;
+int8_t rf=-20;
+int8_t rb=-19;
+
+using namespace okapi;
+auto drive = okapi::ChassisControllerBuilder()
+        .withMotors(
+          {lf, lb},
+          {rf, rb}
+        )
+        // Green gearset, 4 in wheel diam, 11.5 in wheel track
+        .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR })
+        .withOdometry() // Use the same scales as the chassis (above)
+        .withGains(
+       {0.001, 0, 0.0001}, // Distance controller gains
+       {0.001, 0, 0.0001}, // Turn controller gains
+       {0.001, 0, 0.0001}  // Angle controller gains (helps drive straight)
+     )
+        .buildOdometry()
+;
+const double liftkP = 0.001;
+const double liftkI = 0.0001;
+const double liftkD = 0.0001;
+
+auto liftController = AsyncPosControllerBuilder()
+                       .withMotor({3, -5}) // lift motor port 3
+                       .withGains({liftkP, liftkI, liftkD})
+                       .build();
+
+
+
+
+void competition_initialize() {
+
+}
+
+
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -28,31 +68,7 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
- int8_t lf=11;
- int8_t lb=12;
- int8_t rf=-20;
- int8_t rb=-19;
 
- using namespace okapi;
- auto drive = okapi::ChassisControllerBuilder()
-         .withMotors(
-           {lf, lb},
-           {rf, rb}
-         )
-         // Green gearset, 4 in wheel diam, 11.5 in wheel track
-         .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR })
-         .withOdometry() // Use the same scales as the chassis (above)
-         .withGains(
-        {0.001, 0, 0.0001}, // Distance controller gains
-        {0.001, 0, 0.0001}, // Turn controller gains
-        {0.001, 0, 0.0001}  // Angle controller gains (helps drive straight)
-      )
-         .buildOdometry()
-;
-
-void competition_initialize() {
-
-}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -68,6 +84,10 @@ void competition_initialize() {
 void autonomous() {
   drive->moveDistance(12_in); // Drive forward 12 inches
   drive->turnAngle(90_deg);   // Turn in place 90 degrees
+  liftController->setTarget(200); // Move 200 motor degrees upward
+  drive->waitUntilSettled();
+  drive->moveDistance(-12_in); // Drive backwrad 12 inches
+  
 }
 
 /**
