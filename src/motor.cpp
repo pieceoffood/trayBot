@@ -11,16 +11,14 @@ pros::Motor left_roller(1, MOTOR_GEARSET_18, true);
 pros::Motor right_roller(10, MOTOR_GEARSET_18);
 
 //Math
-int
-sgn(int input) {
+int sgn(int input) {
   if (input>0)
     return 1;
   else if (input < 0)
     return -1;
   return 0;
 }
-int
-clipnum(int input, int clip) {
+int clipnum(int input, int clip) {
   if (input > clip)
     return clip;
   else if (input < clip)
@@ -28,8 +26,7 @@ clipnum(int input, int clip) {
   return input;
 }
 
-void
-reset() {
+void reset() {
   left_roller.set_brake_mode(MOTOR_BRAKE_HOLD);
   right_roller.set_brake_mode(MOTOR_BRAKE_HOLD);
   arm.set_brake_mode(MOTOR_BRAKE_HOLD);
@@ -38,38 +35,33 @@ reset() {
 }
 
 //Set motors
-void
-set_tank(int input_l, int input_r) {
+void set_tank(int input_l, int input_r) {
   left_mid.move(input_l);
   left_back.move(input_l);
   right_mid.move(input_r);
   right_back.move(input_r);
 }
 
-void
-set_tray(int input) {
+void set_tray(int input) {
   tray.move(input);
 }
 
-void
-set_arm(int input) {
+void set_arm(int input) {
   arm.move(input);
 }
 
-void
-set_rollers(int input) {
+void set_rollers(int input) {
   left_roller.move(input);
   right_roller.move(input);
 }
 
 //PID
 int t_target;
-void
-set_tray_pid(int input) {
+void set_tray_pid(int input) {
   t_target = input;
 }
-void
-tray_pid(void*) {
+
+void tray_pid(void*) {
 	while (true) {
 		set_tray((t_target-tray.get_position())*0.5);
 		pros::delay(20);
@@ -77,12 +69,10 @@ tray_pid(void*) {
 }
 
 int a_target;
-void
-set_arm_pid(int input) {
+void set_arm_pid(int input) {
   a_target = input;
 }
-void
-arm_pid(void*) {
+void arm_pid(void*) {
   while (true) {
     set_arm((a_target-arm.get_position())*0.5);
     pros::delay(20);
