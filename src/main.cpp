@@ -6,8 +6,8 @@
 
 int8_t lf=11;
 int8_t lb=12;
-int8_t rf=-20;
-int8_t rb=-19;
+int8_t rf=20;
+int8_t rb=19;
 
 using namespace okapi;
 auto drive = okapi::ChassisControllerBuilder()
@@ -16,7 +16,7 @@ auto drive = okapi::ChassisControllerBuilder()
           {rf, rb}
         )
         // Green gearset, 4 in wheel diam, 11.5 in wheel track
-        .withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR })
+        .withDimensions(AbstractMotor::gearset::green, {{4_in, 10_in}, imev5GreenTPR })
         .withOdometry() // Use the same scales as the chassis (above)
         .withGains(
        {0.001, 0, 0.0001}, // Distance controller gains
@@ -30,7 +30,7 @@ const double liftkI = 0.0001;
 const double liftkD = 0.0001;
 
 auto liftController = AsyncPosControllerBuilder()
-                       .withMotor({3, -5}) // lift motor port 3
+                       .withMotor(5) // lift motor port 3
                        .withGains({liftkP, liftkI, liftkD})
                        .build();
 
@@ -82,12 +82,13 @@ void disabled() {}
  * from where it left off.
  */
 void autonomous() {
-  drive->moveDistance(12_in); // Drive forward 12 inches
+  drive->setMaxVelocity(100);
+  drive->moveDistance(24_in); // Drive forward 24 inches
   drive->turnAngle(90_deg);   // Turn in place 90 degrees
-  liftController->setTarget(200); // Move 200 motor degrees upward
+  //liftController->setTarget(200); // Move 200 motor degrees upward
   drive->waitUntilSettled();
   drive->moveDistance(-12_in); // Drive backwrad 12 inches
-  
+
 }
 
 /**
@@ -208,7 +209,8 @@ void autonomous() {
 
  		//set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
     Controller controller;
-    drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
+
+    drive->getModel()->tank(controller.getAnalog(ControllerAnalog::leftY),
                           controller.getAnalog(ControllerAnalog::rightY));
 
  		if (master.get_digital(DIGITAL_L1)) {
