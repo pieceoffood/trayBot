@@ -1,13 +1,23 @@
 #include "main.h"
+#include <iomanip>
 #include "motor.hpp"
 #include "okapi/api.hpp"
+#include "gui.h"
 
-
+/*
+cd (change directory)
+cd .. (go up one level)
+prosv5 make clean (clean everything)
+prosv5 build-compile-commands (compile the code)
+prosv5 upload --slot 5 (upload the program to V5 slot 5)
+prosv5 v5 rm-all
+prosv5 v5 rm-file slot_4.bin --erase-all
+*/
 
 int8_t lf=11;
 int8_t lb=12;
 int8_t rf=20;
-int8_t rb=19;
+int8_t rb=19; // do not need to reverse if reversed in the motor define
 
 using namespace okapi;
 auto drive = okapi::ChassisControllerBuilder()
@@ -49,6 +59,8 @@ void competition_initialize() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
+  pros::delay(10);
+  gui();
 
 }
 
@@ -88,7 +100,23 @@ void autonomous() {
   //liftController->setTarget(200); // Move 200 motor degrees upward
   drive->waitUntilSettled();
   drive->moveDistance(-12_in); // Drive backwrad 12 inches
-
+  switch (auton_sel) {
+    case 1:
+      // auton1();
+    break;
+    case 2:
+      // auton2();
+    break;
+    case 3:
+      // auton3();
+    break;
+    case 4:
+      // auton4();
+    break;
+    default:
+      // empty_auton();
+    break;
+  }
 }
 
 /**
@@ -183,7 +211,7 @@ void autonomous() {
  		} else {
  			if (master.get_digital(DIGITAL_R1)||master.get_digital(DIGITAL_R2)) {
  				was_pid = false;
- 				set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
+ 				set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*80);// set arm to slow speed
  			} else {
  				if (!was_pid) {
  					set_arm(0);
@@ -200,18 +228,68 @@ void autonomous() {
  }
 
  void  opcontrol() {
+
+  std::cout << std::fixed;
+  std::cout << std::setprecision(1);
+  char mytext[100];
+  bool allowPress=true;
+
+  /*Create a screen*/
+  lv_obj_t * scr = lv_obj_create(NULL, NULL);
+  lv_scr_load(scr);                                   /*Load the screen*/
+
+  lv_obj_t * title = lv_label_create(lv_scr_act(), NULL);
+  lv_label_set_text(title, "Debug");
+  lv_obj_align(title, NULL, LV_ALIGN_IN_TOP_MID, 0, 2);  /*Align to the top*/
+
+  /*Create a new style*/
+  /*
+  static lv_style_t style_txt;
+  lv_style_copy(&style_txt, &lv_style_plain);
+  style_txt.text.font = &lv_font_dejavu_20;
+  style_txt.text.letter_space = 2;
+  style_txt.text.line_space = 1;
+  style_txt.text.color = LV_COLOR_HEX(0x606060);
+  */
+
+  /*Create a new label*/
+  lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
+  //lv_obj_set_style(txt, &style_txt);                    /*Set the created style*/
+  lv_label_set_long_mode(txt, LV_LABEL_LONG_BREAK);     /*Break the long lines*/
+  lv_label_set_recolor(txt, true);                      /*Enable re-coloring by commands in the text*/
+  lv_label_set_align(txt, LV_LABEL_ALIGN_LEFT);       /*Center aligned lines*/
+  lv_label_set_text(txt, NULL);
+  lv_obj_set_width(txt, 500);                           /*Set a width*/
+  lv_obj_align(txt, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 20);      /*Align to center*/
+
+
+
+
  	pros::Controller master(CONTROLLER_MASTER);
  	pros::Task tray_control_t(tray_control);
 
+
  	pros::Task t(arm_control);
  	while (true) {
+
+    sprintf(mytext, "claw potentiameter: %d, claw %8.2f \n"
+                "tray: %8.2f, set zero: %d\n"
+                "leftfront:%8.2f rightfront:%8.2f\n"
+                "gyro:%8.2f\n",
+       potentiameter.get_value(),
+       arm.get_position(),
+       tray.get_position(), limitswitch.get_value(),
+       left_front.get_position(), right_front.get_position(),
+       gyro.get_value()
+     );
+lv_label_set_text(txt, mytext);
  		//set_tank(master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_Y));
 
  		//set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
     Controller controller;
 
-    drive->getModel()->tank(controller.getAnalog(ControllerAnalog::leftY),
-                          controller.getAnalog(ControllerAnalog::rightY));
+    drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
+                          controller.getAnalog(ControllerAnalog::rightX));
 
  		if (master.get_digital(DIGITAL_L1)) {
  			set_rollers(127);
