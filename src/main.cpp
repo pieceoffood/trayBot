@@ -119,13 +119,13 @@ void autonomous() {
 
   switch (auton_sel) {
     case 1:
-      drive->setMaxVelocity(100);
-      drive->moveDistance(24_in); // Drive forward 24 inches
-      drive->turnAngle(90_deg);   // Turn in place 90 degrees
-      //liftController->setTarget(200); // Move 200 motor degrees upward
-      drive->waitUntilSettled();
-      drive->moveDistance(-12_in); // Drive backwrad 12 inches
       // auton1();
+      left_roller.move(120);
+      right_roller.move(120);
+      basemovePID(39);
+      pros::delay(5);
+      left_roller.move(0);
+      right_roller.move(0);
     break;
     case 2:
       // auton2();
@@ -135,6 +135,12 @@ void autonomous() {
     break;
     case 3:
       // auton3();
+      drive->setMaxVelocity(100);
+      drive->moveDistance(24_in); // Drive forward 24 inches
+      drive->turnAngle(90_deg);   // Turn in place 90 degrees
+      //liftController->setTarget(200); // Move 200 motor degrees upward
+      drive->waitUntilSettled();
+      drive->moveDistance(-12_in); // Drive backwrad 12 inches
     break;
     case 4:
       // auton4();

@@ -11,7 +11,7 @@ void basemovePID(double target) {
   char mytext[100];
   lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
 
-  pid.setOutputLimits(-70,70);
+  pid.setOutputLimits(-50,50);
   pid.setOutputRampRate(5);
   double start=left_front.get_position();
   double ticks = (target*900)/(4*M_PI)+start;
