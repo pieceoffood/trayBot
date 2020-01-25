@@ -4,6 +4,7 @@
 #include "okapi/api.hpp"
 #include "gui.h"
 #include "MiniPID.h"
+#include "userFn.hpp"
 
 /*
 cd (change directory)
@@ -19,7 +20,7 @@ int8_t lf=11;
 int8_t lb=12;
 int8_t rf=20;
 int8_t rb=19; // do not need to reverse if reversed in the motor define
-MiniPID pid=MiniPID(0.3,0,0.1);
+
 
 using namespace okapi;
 auto drive = okapi::ChassisControllerBuilder()
@@ -46,39 +47,7 @@ auto liftController = AsyncPosControllerBuilder()
                        .withGains({liftkP, liftkI, liftkD})
                        .build();
 
-void basemove(double target) {
 
-  pid.setOutputLimits(-70,70);
-  pid.setOutputRampRate(5);
-  double start=left_front.get_position();
-  double ticks = (target*900)/(4*M_PI)+start;
-  while (fabs(left_front.get_position()-ticks)>5) {
-    double output=pid.getOutput(left_front.get_position(),
-        ticks);
-    left_back.move(output);
-    left_front.move(output);
-    right_back.move(output);
-    right_front.move(output);
-    pros::delay(10);
-  }
-}
-
-void baseturn(double target) {
-
-  pid.setOutputLimits(-50,50);
-  pid.setOutputRampRate(5);
-  double start=gyro.get_value();
-  double turn = target*10+start;
-  while (true) {
-    double output=pid.getOutput(gyro.get_value(),
-        turn);
-    left_back.move(output);
-    left_front.move(output);
-    right_back.move(-output);
-    right_front.move(-output);
-    pros::delay(10);
-  }
-}
 
 
 void competition_initialize() {
@@ -129,6 +98,23 @@ void disabled() {}
  */
 void autonomous() {
 
+  /*Create a screen*/
+  lv_obj_t * scr = lv_obj_create(NULL, NULL);
+  lv_scr_load(scr);                                   /*Load the screen*/
+
+  lv_obj_t * title = lv_label_create(lv_scr_act(), NULL);
+  lv_label_set_text(title, "Debug");
+  lv_obj_align(title, NULL, LV_ALIGN_IN_TOP_MID, 0, 2);  /*Align to the top*/
+  /*Create a new label*/
+  lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
+  //lv_obj_set_style(txt, &style_txt);                    /*Set the created style*/
+  lv_label_set_long_mode(txt, LV_LABEL_LONG_BREAK);     /*Break the long lines*/
+  lv_label_set_recolor(txt, true);                      /*Enable re-coloring by commands in the text*/
+  lv_label_set_align(txt, LV_LABEL_ALIGN_LEFT);       /*Center aligned lines*/
+  lv_label_set_text(txt, NULL);
+  lv_obj_set_width(txt, 500);                           /*Set a width*/
+  lv_obj_align(txt, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 20);      /*Align to center*/
+
 
 
   switch (auton_sel) {
@@ -143,9 +129,9 @@ void autonomous() {
     break;
     case 2:
       // auton2();
-      basemove(12);
-      pros::delay(2000);
-      baseturn(90);
+      basemovePID(12);
+      //pros::delay(2000);
+      baseturnPID(90);
     break;
     case 3:
       // auton3();
@@ -172,100 +158,6 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-
- void  tray_control(void*) {
- 	pros::Controller master(CONTROLLER_MASTER);
- 	pros::Task tray_t(tray_pid);
- 	bool b_toggle = false;
- 	while (true) {
- 		if (master.get_digital(DIGITAL_Y)) {
- 			b_toggle = !b_toggle;
-
- 			if (b_toggle) {
- 				for(int i=0;i<1700;i=i+3) {
- 					set_tray_pid(i);
- 					pros::delay(5);
- 				}
- 			} else {
- 				set_tray_pid(0);
- 			}
-
- 			while (master.get_digital(DIGITAL_Y)) {
- 				pros::delay(1);
- 			}
- 		}
-
- 		pros::delay(20);
- 	}
- }
-
- //Make the right paddle a shift key, making everything into a descore position.
- /*
- void
- arm_control(void*) {
- 	pros::Controller master(CONTROLLER_MASTER);
- 	pros::Task arm_t(arm_pid);
- 	static int HIGH_POLE = 2450, LOW_POLE = 1000, DOWN = 0;
- 	int b_toggle = DOWN;
- 	while (true) {
- 		if (master.get_digital(DIGITAL_R1)) {
- 			if (b_toggle == DOWN || b_toggle == LOW_POLE) {
- 				b_toggle = HIGH_POLE;
- 			} else {
- 				b_toggle = DOWN;
- 			}
- 			set_arm_pid(b_toggle);
- 			while (master.get_digital(DIGITAL_R1)) {
- 				pros::delay(1);
- 			}
- 		}
- 		if (master.get_digital(DIGITAL_R2)) {
- 			if (b_toggle == DOWN || b_toggle == HIGH_POLE) {
- 				b_toggle = LOW_POLE;
- 			} else {
- 				b_toggle = DOWN;
- 			}
- 			set_arm_pid(b_toggle);
- 			while (master.get_digital(DIGITAL_R2)) {
- 				pros::delay(1);
- 			}
- 		}
- 		pros::delay(20);
- 	}
- }
- */
-
- void  arm_control(void*) {
- 	pros::Controller master(CONTROLLER_MASTER);
- 	pros::Task arm_t(arm_pid);
- 	bool was_pid;
- 	while (true) {
- 		if (master.get_digital(DIGITAL_B)) {
- 			was_pid = true;
- 			arm_t.resume();
- 			set_arm_pid(2300);
- 		} else if (master.get_digital(DIGITAL_DOWN)) {
- 			was_pid = true;
- 			arm_t.resume();
- 			set_arm_pid(1800);
- 		} else {
- 			if (master.get_digital(DIGITAL_R1)||master.get_digital(DIGITAL_R2)) {
- 				was_pid = false;
- 				set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*80);// set arm to slow speed
- 			} else {
- 				if (!was_pid) {
- 					set_arm(0);
- 				}
- 			}
- 		}
-
- 		if (!was_pid) {
- 			arm_t.suspend();
- 		}
-
- 		pros::delay(20);
- 	}
- }
 
  void  opcontrol() {
 
