@@ -3,6 +3,7 @@
 #include "motor.hpp"
 #include "okapi/api.hpp"
 #include "gui.h"
+#include "MiniPID.h"
 
 /*
 cd (change directory)
@@ -18,6 +19,7 @@ int8_t lf=11;
 int8_t lb=12;
 int8_t rf=20;
 int8_t rb=19; // do not need to reverse if reversed in the motor define
+MiniPID pid=MiniPID(0.3,0,0.1);
 
 using namespace okapi;
 auto drive = okapi::ChassisControllerBuilder()
@@ -44,7 +46,39 @@ auto liftController = AsyncPosControllerBuilder()
                        .withGains({liftkP, liftkI, liftkD})
                        .build();
 
+void basemove(double target) {
 
+  pid.setOutputLimits(-70,70);
+  pid.setOutputRampRate(5);
+  double start=left_front.get_position();
+  double ticks = (target*900)/(4*M_PI)+start;
+  while (fabs(left_front.get_position()-ticks)>5) {
+    double output=pid.getOutput(left_front.get_position(),
+        ticks);
+    left_back.move(output);
+    left_front.move(output);
+    right_back.move(output);
+    right_front.move(output);
+    pros::delay(10);
+  }
+}
+
+void baseturn(double target) {
+
+  pid.setOutputLimits(-50,50);
+  pid.setOutputRampRate(5);
+  double start=gyro.get_value();
+  double turn = target*10+start;
+  while (true) {
+    double output=pid.getOutput(gyro.get_value(),
+        turn);
+    left_back.move(output);
+    left_front.move(output);
+    right_back.move(-output);
+    right_front.move(-output);
+    pros::delay(10);
+  }
+}
 
 
 void competition_initialize() {
@@ -94,18 +128,24 @@ void disabled() {}
  * from where it left off.
  */
 void autonomous() {
-  drive->setMaxVelocity(100);
-  drive->moveDistance(24_in); // Drive forward 24 inches
-  drive->turnAngle(90_deg);   // Turn in place 90 degrees
-  //liftController->setTarget(200); // Move 200 motor degrees upward
-  drive->waitUntilSettled();
-  drive->moveDistance(-12_in); // Drive backwrad 12 inches
+
+
+
   switch (auton_sel) {
     case 1:
+      drive->setMaxVelocity(100);
+      drive->moveDistance(24_in); // Drive forward 24 inches
+      drive->turnAngle(90_deg);   // Turn in place 90 degrees
+      //liftController->setTarget(200); // Move 200 motor degrees upward
+      drive->waitUntilSettled();
+      drive->moveDistance(-12_in); // Drive backwrad 12 inches
       // auton1();
     break;
     case 2:
       // auton2();
+      basemove(12);
+      pros::delay(2000);
+      baseturn(90);
     break;
     case 3:
       // auton3();
