@@ -11,11 +11,11 @@ void basemovePID(double target) {
   char mytext[100];
   lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
 
-  pid.setOutputLimits(-50,50);
+  pid.setOutputLimits(-30,30);
   pid.setOutputRampRate(5);
   double start=left_front.get_position();
   double ticks = (target*900)/(4*M_PI)+start;
-  while (fabs(left_front.get_position()-ticks)>5) {
+  while (fabs(left_front.get_position()-ticks)>10) {
     double output=pid.getOutput(left_front.get_position(),
         ticks);
     left_back.move(output);
@@ -24,7 +24,8 @@ void basemovePID(double target) {
     right_front.move(output);
     lv_label_set_text(txt, NULL);
     printf("base start %8.2f, target %8.2f, base %8.2f\n", start, ticks,left_front.get_position());
-    sprintf(mytext, "base start %8.2f\n, target %8.2f\n, base %8.2f\n", start, ticks,left_front.get_position()
+    sprintf(mytext, "base start %8.2f\n, target %8.2f\n, base %8.2f\n, output  base %8.2f\n",
+            start, ticks,left_front.get_position(), output
          );
     lv_label_set_text(txt, mytext);
     pros::delay(10);
@@ -40,7 +41,7 @@ void baseturnPID(double target) {
   pid.setOutputRampRate(5);
   double start=gyro.get_value();
   double turn = target*10+start;
-  while (true) {
+  while (fabs(gyro.get_value()-turn)>3) {
     double output=pid.getOutput(gyro.get_value(),
         turn);
     left_back.move(output);
