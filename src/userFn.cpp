@@ -22,7 +22,7 @@ void basemovePID(double target) {
     left_front.move(output);
     right_back.move(output);
     right_front.move(output);
-    lv_label_set_text(txt, NULL);
+    
     printf("base start %8.2f, target %8.2f, base %8.2f\n", start, ticks,left_front.get_position());
     sprintf(mytext, "base start %8.2f\n, target %8.2f\n, base %8.2f\n, output  base %8.2f\n",
             start, ticks,left_front.get_position(), output

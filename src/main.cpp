@@ -38,6 +38,8 @@ auto drive = okapi::ChassisControllerBuilder()
      )
         .buildOdometry()
 ;
+//The model pointer stuff is currently necessary to use the xArcade method of the chassis controller.
+auto xModel = std::dynamic_pointer_cast<XDriveModel>(drive->getModel());
 const double liftkP = 0.001;
 const double liftkI = 0.0001;
 const double liftkD = 0.0001;
@@ -253,9 +255,15 @@ void autonomous() {
 
  		//set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
 
+    xModel->xArcade(
+          controller.getAnalog(ControllerAnalog::rightX),
+          controller.getAnalog(ControllerAnalog::rightY),
+          controller.getAnalog(ControllerAnalog::leftX));
 
+    /*
     drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
                           controller.getAnalog(ControllerAnalog::rightX));
+    */
 
  		if (master.get_digital(DIGITAL_L1)) {
  			set_rollers(127);
