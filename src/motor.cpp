@@ -5,7 +5,7 @@ pros::Motor left_front (11, MOTOR_GEARSET_18);
 pros::Motor right_back (19, MOTOR_GEARSET_18,true);
 pros::Motor right_front (20, MOTOR_GEARSET_18, true);
 
-pros::Motor tray(16, MOTOR_GEARSET_36, true);
+pros::Motor tray(16, MOTOR_GEARSET_18, true);
 pros::Motor arm(4, MOTOR_GEARSET_18, true);
 pros::Motor left_roller(1, MOTOR_GEARSET_18);
 pros::Motor right_roller(10, MOTOR_GEARSET_18, true);
@@ -33,7 +33,7 @@ int clipnum(int input, int clip) {
 void reset() {
   left_roller.set_brake_mode(MOTOR_BRAKE_HOLD);
   right_roller.set_brake_mode(MOTOR_BRAKE_HOLD);
-  arm.set_brake_mode(MOTOR_BRAKE_HOLD);
+  arm.set_brake_mode(MOTOR_BRAKE_COAST);
   arm.set_zero_position(0);
   tray.set_zero_position(0);
 }

@@ -64,6 +64,7 @@ void competition_initialize() {
 void initialize() {
   pros::delay(10);
   gui();
+  arm.set_brake_mode(MOTOR_BRAKE_COAST);
 
 }
 
@@ -103,7 +104,7 @@ void autonomous() {
   lv_scr_load(scr);                                   /*Load the screen*/
 
   lv_obj_t * title = lv_label_create(lv_scr_act(), NULL);
-  lv_label_set_text(title, "Debug");
+  lv_label_set_text(title, "Auto Debug");
   lv_obj_align(title, NULL, LV_ALIGN_IN_TOP_MID, 0, 2);  /*Align to the top*/
   /*Create a new label*/
   lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
@@ -177,7 +178,7 @@ void autonomous() {
   lv_scr_load(scr);                                   /*Load the screen*/
 
   lv_obj_t * title = lv_label_create(lv_scr_act(), NULL);
-  lv_label_set_text(title, "Debug");
+  lv_label_set_text(title, "Drive Debug");
   lv_obj_align(title, NULL, LV_ALIGN_IN_TOP_MID, 0, 2);  /*Align to the top*/
 
   /*Create a new style*/
@@ -210,7 +211,7 @@ void autonomous() {
  	pros::Task t(arm_control);
  	while (true) {
 
-    sprintf(mytext, "claw potentiameter: %d, claw %8.2f \n"
+    sprintf(mytext, "arm potentiameter: %d, arm %8.2f \n"
                 "tray: %8.2f, set zero: %d\n"
                 "leftfront:%8.2f rightfront:%8.2f\n"
                 "gyro:%8.2f\n",
@@ -225,6 +226,14 @@ lv_label_set_text(txt, mytext);
 
  		//set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
     Controller controller;
+    //The model pointer stuff is currently necessary to use the xArcade method of the chassis controller.
+    /*
+    auto xModel = std::dynamic_pointer_cast<XDriveModel>(drive->getModel());
+    xModel->xArcade(
+          controller.getAnalog(ControllerAnalog::rightX),
+          controller.getAnalog(ControllerAnalog::rightY),
+          controller.getAnalog(ControllerAnalog::leftX));
+    */
 
     drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
                           controller.getAnalog(ControllerAnalog::rightX));

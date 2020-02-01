@@ -163,11 +163,11 @@ void  arm_control(void*) {
    if (master.get_digital(DIGITAL_B)) {
      was_pid = true;
      arm_t.resume();
-     set_arm_pid(2300);
+     set_arm_pid(1300);
    } else if (master.get_digital(DIGITAL_DOWN)) {
      was_pid = true;
      arm_t.resume();
-     set_arm_pid(1800);
+     set_arm_pid(900);
    } else {
      if (master.get_digital(DIGITAL_R1)||master.get_digital(DIGITAL_R2)) {
        was_pid = false;
