@@ -38,6 +38,8 @@ auto drive = okapi::ChassisControllerBuilder()
      )
         .buildOdometry()
 ;
+//The model pointer stuff is currently necessary to use the xArcade method of the chassis controller.
+//auto xModel = std::dynamic_pointer_cast<XDriveModel>(drive->getModel());
 const double liftkP = 0.001;
 const double liftkI = 0.0001;
 const double liftkD = 0.0001;
@@ -48,7 +50,10 @@ auto liftController = AsyncPosControllerBuilder()
                        .build();
 
 
-
+auto profileController =AsyncMotionProfileControllerBuilder()
+                       .withLimits({0.5, 1.0, 5.0})
+                       .withOutput(drive)
+                       .buildMotionProfileController();
 
 void competition_initialize() {
 
@@ -97,6 +102,8 @@ void disabled() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
+
 void autonomous() {
 
   /*Create a screen*/
@@ -124,9 +131,21 @@ void autonomous() {
       left_roller.move(120);
       right_roller.move(120);
       basemovePID(39);
-      pros::delay(5);
+      pros::delay(10);
+      basemovePID(-5);
+      pros::delay(10);
       left_roller.move(0);
       right_roller.move(0);
+      baseturnPID(-45);
+      basemovePID(-24*1.414);
+      baseturnPID(45);
+      pros::delay(10);
+      left_roller.move(120);
+      right_roller.move(120);
+      basemovePID(30);
+      left_roller.move(0);
+      right_roller.move(0);
+
     break;
     case 2:
       // auton2();
@@ -145,6 +164,14 @@ void autonomous() {
     break;
     case 4:
       // auton4();
+      profileController->generatePath({
+        {0_ft, 0_ft, 0_deg},  // Profile starting position, this will normally be (0, 0, 0)
+        {1_ft, 1_ft, 90_deg}}, // The next point in the profile, 3 feet forward
+        "A" // Profile name
+      );
+      profileController->setTarget("A");
+      profileController->waitUntilSettled();
+
     break;
     default:
       // empty_auton();
@@ -207,9 +234,11 @@ void autonomous() {
  	pros::Controller master(CONTROLLER_MASTER);
  	pros::Task tray_control_t(tray_control);
 
-
+  master.clear();
  	pros::Task t(arm_control);
  	while (true) {
+    Controller controller;
+    master.set_text(0, 0, "Vestavia");
 
     sprintf(mytext, "arm potentiameter: %d, arm %8.2f \n"
                 "tray: %8.2f, set zero: %d\n"
@@ -221,14 +250,12 @@ void autonomous() {
        left_front.get_position(), right_front.get_position(),
        gyro.get_value()
      );
-lv_label_set_text(txt, mytext);
+    lv_label_set_text(txt, mytext);
+    master.print(1, 0, "Counter: %d", left_front.get_position());
  		//set_tank(master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_Y));
 
  		//set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
-    Controller controller;
-    //The model pointer stuff is currently necessary to use the xArcade method of the chassis controller.
     /*
-    auto xModel = std::dynamic_pointer_cast<XDriveModel>(drive->getModel());
     xModel->xArcade(
           controller.getAnalog(ControllerAnalog::rightX),
           controller.getAnalog(ControllerAnalog::rightY),
@@ -237,6 +264,7 @@ lv_label_set_text(txt, mytext);
 
     drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
                           controller.getAnalog(ControllerAnalog::rightX));
+    
 
  		if (master.get_digital(DIGITAL_L1)) {
  			set_rollers(127);
@@ -248,6 +276,6 @@ lv_label_set_text(txt, mytext);
  			set_rollers(0);
  		}
 
- 		pros::delay(20);
+ 		pros::delay(100);
  	}
  }

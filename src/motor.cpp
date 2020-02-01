@@ -38,7 +38,7 @@ void reset() {
   tray.set_zero_position(0);
 }
 
-//Set motors
+//Set motors speed
 void set_tank(int input_l, int input_r) {
   left_front.move(input_l);
   left_back.move(input_l);
