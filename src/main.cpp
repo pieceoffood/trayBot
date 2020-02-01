@@ -233,13 +233,19 @@ void autonomous() {
 
  	pros::Controller master(CONTROLLER_MASTER);
  	pros::Task tray_control_t(tray_control);
+  Controller controller;
 
   master.clear();
+  master.print(0, 0, "VEX");
+  auto timeFlag=pros::millis();
  	pros::Task t(arm_control);
  	while (true) {
-    Controller controller;
-    master.set_text(0, 0, "Vestavia");
-
+    if(pros::millis()-timeFlag>=1000)
+             {
+                    master.print(1, 0, "arm:%8.2f", arm.get_position());
+                    timeFlag=pros::millis();
+             }
+             
     sprintf(mytext, "arm potentiameter: %d, arm %8.2f \n"
                 "tray: %8.2f, set zero: %d\n"
                 "leftfront:%8.2f rightfront:%8.2f\n"
@@ -251,7 +257,6 @@ void autonomous() {
        gyro.get_value()
      );
     lv_label_set_text(txt, mytext);
-    master.print(1, 0, "Counter: %d", left_front.get_position());
  		//set_tank(master.get_analog(ANALOG_LEFT_Y), master.get_analog(ANALOG_RIGHT_Y));
 
  		//set_arm((master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*127);
@@ -264,7 +269,7 @@ void autonomous() {
 
     drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
                           controller.getAnalog(ControllerAnalog::rightX));
-    
+
 
  		if (master.get_digital(DIGITAL_L1)) {
  			set_rollers(127);
@@ -276,6 +281,6 @@ void autonomous() {
  			set_rollers(0);
  		}
 
- 		pros::delay(100);
+ 		pros::delay(10);
  	}
  }
