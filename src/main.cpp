@@ -232,20 +232,21 @@ void autonomous() {
 
 
  	pros::Controller master(CONTROLLER_MASTER);
- 	pros::Task tray_control_t(tray_control);
   Controller controller;
+  pros::Task tray_control_t(tray_control);
+  pros::Task t(arm_control);
 
   master.clear();
   master.print(0, 0, "VEX");
   auto timeFlag=pros::millis();
- 	pros::Task t(arm_control);
+
  	while (true) {
     if(pros::millis()-timeFlag>=1000)
              {
                     master.print(1, 0, "arm:%8.2f", arm.get_position());
                     timeFlag=pros::millis();
              }
-             
+
     sprintf(mytext, "arm potentiameter: %d, arm %8.2f \n"
                 "tray: %8.2f, set zero: %d\n"
                 "leftfront:%8.2f rightfront:%8.2f\n"
@@ -276,7 +277,7 @@ void autonomous() {
  		} else if (master.get_digital(DIGITAL_L2)) {
  			set_rollers(-127);
  		} else if (master.get_digital(DIGITAL_RIGHT)) {
- 			set_rollers(60);
+ 			set_rollers(-60);
  		} else {
  			set_rollers(0);
  		}

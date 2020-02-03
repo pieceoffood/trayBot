@@ -17,28 +17,4 @@ extern pros::ADIAnalogIn potentiameter;
 extern pros::ADIGyro gyro;
 extern pros::ADIDigitalIn limitswitchball;
 
-void set_tank(int input_l, int input_r);
-void set_tray(int input);
-void set_arm(int input);
-void set_rollers(int input);
-void set_tray_pid(int input);
-void tray_pid(void*);
-void set_arm_pid(int input);
-void arm_pid(void*);
-void reset();
-
-extern int sgn(int input);
-extern int clipnum(int input, int clip);
-void reset();
-void set_tank(int input_l, int input_r);
-void set_tray(int input);
-void set_arm(int input);
-void set_rollers(int input);
-extern int t_target;
-void set_tray_pid(int input);
-void tray_pid(void*) ;
-extern int a_target;
-void set_arm_pid(int input);
-void arm_pid(void*);
-
 #endif

@@ -3,15 +3,12 @@
 #include "motor.hpp"
 #include "MiniPID.h"
 
-
-
-
 void basemovePID(double target) {
   MiniPID pid=MiniPID(0.3,0,0.1);
   char mytext[100];
   lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
 
-  pid.setOutputLimits(-30,30);
+  pid.setOutputLimits(-80,80);
   pid.setOutputRampRate(5);
   double start=left_front.get_position();
   double ticks = (target*900)/(4*M_PI)+start;
@@ -22,7 +19,7 @@ void basemovePID(double target) {
     left_front.move(output);
     right_back.move(output);
     right_front.move(output);
-    
+
     printf("base start %8.2f, target %8.2f, base %8.2f\n", start, ticks,left_front.get_position());
     sprintf(mytext, "base start %8.2f\n, target %8.2f\n, base %8.2f\n, output  base %8.2f\n",
             start, ticks,left_front.get_position(), output
@@ -79,13 +76,66 @@ void baseturn(int left, int speed) // right=positive and left=negative
 
 
 
+//Math
+int sgn(int input) {
+  if (input>0)
+    return 1;
+  else if (input < 0)
+    return -1;
+  return 0;
+}
+int clipnum(int input, int clip) {
+  if (input > clip)
+    return clip;
+  else if (input < -clip)
+    return -clip;
+  return input;
+}
 
+void reset() {
+  left_roller.set_brake_mode(MOTOR_BRAKE_HOLD);
+  right_roller.set_brake_mode(MOTOR_BRAKE_HOLD);
+  arm.set_brake_mode(MOTOR_BRAKE_HOLD);
+  arm.set_zero_position(0);
+  tray.set_zero_position(0);
+}
 
+void set_tray(int input) {
+  tray.move(input);
+}
 
+void set_arm(int input) {
+  arm.move(input);
+}
 
+void set_rollers(int input) {
+  left_roller.move(input);
+  right_roller.move(input);
+}
 
+//PID
+int t_target;
+void set_tray_pid(int input) {
+  t_target = input;
+}
 
+void tray_pid(void*) {
+	while (true) {
+		set_tray((t_target-tray.get_position())*0.5);
+		pros::delay(20);
+	}
+}
 
+int a_target;
+void set_arm_pid(int input) {
+  a_target = input;
+}
+void arm_pid(void*) {
+  while (true) {
+    set_arm((a_target-arm.get_position())*0.5);
+    pros::delay(20);
+  }
+}
 
 
 
@@ -112,7 +162,7 @@ void  tray_control(void*) {
      }
 
      while (master.get_digital(DIGITAL_Y)) {
-       pros::delay(1);
+       pros::delay(10);
      }
    }
 
