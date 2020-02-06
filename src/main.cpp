@@ -69,7 +69,7 @@ void competition_initialize() {
 void initialize() {
   pros::delay(10);
   gui();
-  arm.set_brake_mode(MOTOR_BRAKE_COAST);
+  arm.set_brake_mode(MOTOR_BRAKE_HOLD);
 
 }
 
@@ -194,7 +194,6 @@ void autonomous() {
  */
 
  void  opcontrol() {
-
   std::cout << std::fixed;
   std::cout << std::setprecision(1);
   char mytext[100];

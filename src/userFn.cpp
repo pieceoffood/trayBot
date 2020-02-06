@@ -3,6 +3,12 @@
 #include "motor.hpp"
 #include "MiniPID.h"
 
+
+/*
+ * move the chassis with PID control
+ *
+ * @param tartget target of the moveDistance
+ */
 void basemovePID(double target) {
   MiniPID pid=MiniPID(0.3,0,0.1);
   char mytext[100];
@@ -29,6 +35,12 @@ void basemovePID(double target) {
   }
 }
 
+
+/*
+ * turn the chassis with PID control
+ * using gyro censor
+ * @param tartget turning angle in degrees
+ */
 void baseturnPID(double target) {
   MiniPID pid=MiniPID(0.3,0,0.1);
   char mytext[100];
@@ -55,7 +67,13 @@ void baseturnPID(double target) {
 }
 
 
-void basemovement(double distance, int speed)
+/**
+ * move the chassis
+ *
+ * @param distance in inches
+ * @param speed -127 to 127
+ */
+void basemove(double distance, int speed)
 {
   double ticks=(distance*900)/(4*M_PI);
   left_front.move_relative  (ticks, speed);
@@ -64,6 +82,11 @@ void basemovement(double distance, int speed)
   right_back.move_relative  (ticks, speed);
 }
 
+/*
+ turn the chassis 90 degree
+ @param left =1, right=-1
+ @param speed
+*/
 void baseturn(int left, int speed) // right=positive and left=negative
 {
   double ticks=735*left;
