@@ -16,45 +16,6 @@ prosv5 v5 rm-all
 prosv5 v5 rm-file slot_4.bin --erase-all
 */
 
-int8_t lf=11;
-int8_t lb=12;
-int8_t rf=20;
-int8_t rb=19; // do not need to reverse if reversed in the motor define
-
-
-using namespace okapi;
-auto drive = okapi::ChassisControllerBuilder()
-        .withMotors(
-          {lf, lb},
-          {rf, rb}
-        )
-        // Green gearset, 4 in wheel diam, 11.5 in wheel track
-        .withDimensions(AbstractMotor::gearset::green, {{4_in, 10_in}, imev5GreenTPR })
-        .withOdometry() // Use the same scales as the chassis (above)
-        .withGains(
-       {0.001, 0, 0.0001}, // Distance controller gains
-       {0.001, 0, 0.0001}, // Turn controller gains
-       {0.001, 0, 0.0001}  // Angle controller gains (helps drive straight)
-     )
-        .buildOdometry()
-;
-//The model pointer stuff is currently necessary to use the xArcade method of the chassis controller.
-//auto xModel = std::dynamic_pointer_cast<XDriveModel>(drive->getModel());
-const double liftkP = 0.001;
-const double liftkI = 0.0001;
-const double liftkD = 0.0001;
-
-auto liftController = AsyncPosControllerBuilder()
-                       .withMotor(5) // lift motor port 3
-                       .withGains({liftkP, liftkI, liftkD})
-                       .build();
-
-
-auto profileController =AsyncMotionProfileControllerBuilder()
-                       .withLimits({0.5, 1.0, 5.0})
-                       .withOutput(drive)
-                       .buildMotionProfileController();
-
 void competition_initialize() {
 
 }
@@ -68,8 +29,7 @@ void competition_initialize() {
  */
 void initialize() {
   pros::delay(10);
-  gui();
-  arm.set_brake_mode(MOTOR_BRAKE_HOLD);
+  lv_ex_tabview_1();
 
 }
 
@@ -105,25 +65,45 @@ void disabled() {}
 
 
 void autonomous() {
+  lv_tabview_set_tab_act(tabview, 1, LV_ANIM_NONE);
 
-  /*Create a screen*/
-  lv_obj_t * scr = lv_obj_create(NULL, NULL);
-  lv_scr_load(scr);                                   /*Load the screen*/
+  using namespace okapi;
+  int8_t lf=11;
+  int8_t lb=12;
+  int8_t rf=20;
+  int8_t rb=19; // do not need to reverse if reversed in the motor define
 
-  lv_obj_t * title = lv_label_create(lv_scr_act(), NULL);
-  lv_label_set_text(title, "Auto Debug");
-  lv_obj_align(title, NULL, LV_ALIGN_IN_TOP_MID, 0, 2);  /*Align to the top*/
-  /*Create a new label*/
-  lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
-  //lv_obj_set_style(txt, &style_txt);                    /*Set the created style*/
-  lv_label_set_long_mode(txt, LV_LABEL_LONG_BREAK);     /*Break the long lines*/
-  lv_label_set_recolor(txt, true);                      /*Enable re-coloring by commands in the text*/
-  lv_label_set_align(txt, LV_LABEL_ALIGN_LEFT);       /*Center aligned lines*/
-  lv_label_set_text(txt, NULL);
-  lv_obj_set_width(txt, 500);                           /*Set a width*/
-  lv_obj_align(txt, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 20);      /*Align to center*/
+  auto drive = okapi::ChassisControllerBuilder()
+          .withMotors(
+            {lf, lb},
+            {rf, rb}
+          )
+          // Green gearset, 4 in wheel diam, 11.5 in wheel track
+          .withDimensions(AbstractMotor::gearset::green, {{4_in, 10_in}, imev5GreenTPR })
+          .withOdometry() // Use the same scales as the chassis (above)
+          .withGains(
+         {0.003, 0.0001, 0.0001}, // Distance controller gains
+         {0.003, 0.0001, 0.0001}, // Turn controller gains
+         {0.003, 0.0001, 0.0001}  // Angle controller gains (helps drive straight)
+       )
+          .buildOdometry()
+  ;
+  //The model pointer stuff is currently necessary to use the xArcade method of the chassis controller.
+  //auto xModel = std::dynamic_pointer_cast<XDriveModel>(drive->getModel());
+  const double liftkP = 0.001;
+  const double liftkI = 0.0001;
+  const double liftkD = 0.0001;
+
+  auto liftController = AsyncPosControllerBuilder()
+                         .withMotor(5) // lift motor port 3
+                         .withGains({liftkP, liftkI, liftkD})
+                         .build();
 
 
+  auto profileController =AsyncMotionProfileControllerBuilder()
+                         .withLimits({0.5, 1.0, 5.0})
+                         .withOutput(drive)
+                         .buildMotionProfileController();
 
   switch (auton_sel) {
     case 1:
@@ -200,38 +180,9 @@ void autonomous() {
   bool allowPress=true;
 
   /*Create a screen*/
-  lv_obj_t * scr = lv_obj_create(NULL, NULL);
-  lv_scr_load(scr);                                   /*Load the screen*/
-
-  lv_obj_t * title = lv_label_create(lv_scr_act(), NULL);
-  lv_label_set_text(title, "Drive Debug");
-  lv_obj_align(title, NULL, LV_ALIGN_IN_TOP_MID, 0, 2);  /*Align to the top*/
-
-  /*Create a new style*/
-  /*
-  static lv_style_t style_txt;
-  lv_style_copy(&style_txt, &lv_style_plain);
-  style_txt.text.font = &lv_font_dejavu_20;
-  style_txt.text.letter_space = 2;
-  style_txt.text.line_space = 1;
-  style_txt.text.color = LV_COLOR_HEX(0x606060);
-  */
-
-  /*Create a new label*/
-  lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
-  //lv_obj_set_style(txt, &style_txt);                    /*Set the created style*/
-  lv_label_set_long_mode(txt, LV_LABEL_LONG_BREAK);     /*Break the long lines*/
-  lv_label_set_recolor(txt, true);                      /*Enable re-coloring by commands in the text*/
-  lv_label_set_align(txt, LV_LABEL_ALIGN_LEFT);       /*Center aligned lines*/
-  lv_label_set_text(txt, NULL);
-  lv_obj_set_width(txt, 500);                           /*Set a width*/
-  lv_obj_align(txt, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 20);      /*Align to center*/
-
-
-
+  lv_tabview_set_tab_act(tabview, 2, LV_ANIM_NONE);
 
  	pros::Controller master(CONTROLLER_MASTER);
-  Controller controller;
   pros::Task tray_control_t(tray_control);
   pros::Task t(arm_control);
 
@@ -266,11 +217,11 @@ void autonomous() {
           controller.getAnalog(ControllerAnalog::rightY),
           controller.getAnalog(ControllerAnalog::leftX));
     */
-
+    /*
     drive->getModel()->arcade(controller.getAnalog(ControllerAnalog::leftY),
                           controller.getAnalog(ControllerAnalog::rightX));
 
-
+    */
  		if (master.get_digital(DIGITAL_L1)) {
  			set_rollers(127);
  		} else if (master.get_digital(DIGITAL_L2)) {
