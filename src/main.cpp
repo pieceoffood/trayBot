@@ -82,15 +82,15 @@ void autonomous() {
           .withDimensions(AbstractMotor::gearset::green, {{4_in, 10_in}, imev5GreenTPR })
           .withOdometry() // Use the same scales as the chassis (above)
           .withGains(
-         {0.003, 0.0001, 0.0001}, // Distance controller gains
-         {0.003, 0.0001, 0.0001}, // Turn controller gains
-         {0.003, 0.0001, 0.0001}  // Angle controller gains (helps drive straight)
+         {0.00628, 0.0001, 0.0001}, // Distance controller gains
+         {0.00628, 0.0001, 0.0001}, // Turn controller gains
+         {0.00628, 0.0001, 0.0001}  // Angle controller gains (helps drive straight)
        )
           .buildOdometry()
   ;
   //The model pointer stuff is currently necessary to use the xArcade method of the chassis controller.
   //auto xModel = std::dynamic_pointer_cast<XDriveModel>(drive->getModel());
-  const double liftkP = 0.001;
+  const double liftkP = 0.00628;
   const double liftkI = 0.0001;
   const double liftkD = 0.0001;
 
