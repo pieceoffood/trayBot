@@ -82,9 +82,9 @@ void autonomous() {
           .withDimensions(AbstractMotor::gearset::green, {{4_in, 10_in}, imev5GreenTPR })
           .withOdometry() // Use the same scales as the chassis (above)
           .withGains(
-         {0.00628, 0.0001, 0.0001}, // Distance controller gains
-         {0.00628, 0.0001, 0.0001}, // Turn controller gains
-         {0.00628, 0.0001, 0.0001}  // Angle controller gains (helps drive straight)
+         {0.00128, 0.00000, 0.0000}, // Distance controller gains
+         {0.00128, 0.00000, 0.0000}, // Turn controller gains
+         {0.00128, 0.00000, 0.0000}  // Angle controller gains (helps drive straight)
        )
           .buildOdometry()
   ;
