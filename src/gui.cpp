@@ -9,6 +9,7 @@
 // credit to https://github.com/kunwarsahni01/Vex-Autonomous-Selector
 // forward declaration of following two objects
 lv_obj_t * txt ;
+lv_obj_t * label ;
 lv_obj_t * tabview ;
 
 int auton_sel = 0;

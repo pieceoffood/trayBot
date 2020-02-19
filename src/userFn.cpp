@@ -2,7 +2,7 @@
 #include "cmath"
 #include "motor.hpp"
 #include "MiniPID.h"
-
+#include "gui.h"
 
 /*
  * move the chassis with PID control
@@ -12,7 +12,7 @@
 void basemovePID(double target) {
   MiniPID pid=MiniPID(0.3,0,0.1);
   char mytext[100];
-  lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
+  //lv_obj_t * label = lv_label_create(tab2, NULL);
 
   pid.setOutputLimits(-80,80);
   pid.setOutputRampRate(5);
@@ -30,7 +30,7 @@ void basemovePID(double target) {
     sprintf(mytext, "base start %8.2f\n, target %8.2f\n, base %8.2f\n, output  base %8.2f\n",
             start, ticks,left_front.get_position(), output
          );
-    lv_label_set_text(txt, mytext);
+    lv_label_set_text(label, mytext);
     pros::delay(10);
   }
 }
@@ -44,7 +44,6 @@ void basemovePID(double target) {
 void baseturnPID(double target) {
   MiniPID pid=MiniPID(0.3,0,0.1);
   char mytext[100];
-  lv_obj_t * txt = lv_label_create(lv_scr_act(), NULL);
 
   pid.setOutputLimits(-50,50);
   pid.setOutputRampRate(5);
@@ -57,11 +56,10 @@ void baseturnPID(double target) {
     left_front.move(output);
     right_back.move(-output);
     right_front.move(-output);
-    lv_label_set_text(txt, NULL);
     printf("base start %8.2f, target %8.2f, gyro %8.2f\n", start, turn,gyro.get_value());
-    sprintf(mytext, "\n\n\n\n\ngyro start %8.2f\n, target %8.2f\n, gyro %8.2f\n", start, turn,gyro.get_value()
+    sprintf(mytext, "gyro start %8.2f\n, target %8.2f\n, gyro %8.2f\n", start, turn,gyro.get_value()
          );
-    lv_label_set_text(txt, mytext);
+    lv_label_set_text(label, mytext);
     pros::delay(10);
   }
 }
