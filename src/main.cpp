@@ -137,7 +137,9 @@ void autonomous() {
       // auton3();
       drive->setMaxVelocity(100);
       drive->moveDistance(24_in); // Drive forward 24 inches
+      drive->waitUntilSettled();
       drive->turnAngle(90_deg);   // Turn in place 90 degrees
+      drive->waitUntilSettled();
       //liftController->setTarget(200); // Move 200 motor degrees upward
       drive->waitUntilSettled();
       drive->moveDistance(-12_in); // Drive backwrad 12 inches
@@ -149,7 +151,21 @@ void autonomous() {
         {1_ft, 1_ft, 90_deg}}, // The next point in the profile, 3 feet forward
         "A" // Profile name
       );
+      profileController->generatePath({
+        {0_ft, 0_ft, 0_deg},  // Profile starting position, this will normally be (0, 0, 0)
+        {3_ft, 0_ft, 0_deg}}, // The next point in the profile, 3 feet forward
+        "B" // Profile name
+      );
+      profileController->generatePath({
+        {0_ft, 0_ft, 0_deg},  // Profile starting position, this will normally be (0, 0, 0)
+        {3_ft, 0_ft, 0_deg}}, // The next point in the profile, 3 feet forward
+        "C" // Profile name
+      );
       profileController->setTarget("A");
+      profileController->waitUntilSettled();
+      profileController->setTarget("B");
+      profileController->waitUntilSettled();
+      profileController->setTarget("C", true); // backward
       profileController->waitUntilSettled();
 
     break;
